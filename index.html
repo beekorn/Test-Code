@@ -1,0 +1,183 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Code Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="page-layout">
+        <div class="sidebar">
+            <h3 style="color: #ffebeb;">Coding Resources</h3>
+            <div class="sidebar-links">
+                <a href="https://websim.ai" target="_blank" class="sidebar-link">
+                    <span>🌐</span> WebSim AI
+                </a>
+                <a href="https://appgen.groqlabs.com" target="_blank" class="sidebar-link">
+                    <span>📱</span> AppGen
+                </a>
+                <a href="https://chat.qwenlm.ai" target="_blank" class="sidebar-link">
+                    <span>💬</span> Qwen Chat
+                </a>
+                <a href="https://chat.deepseek.com" target="_blank" class="sidebar-link">
+                    <span>🤖</span> DeepSeek Chat
+                </a>
+                <a href="https://chat.openai.com" target="_blank" class="sidebar-link">
+                    <span>🎯</span> ChatGPT
+                </a>
+                <a href="https://github.com" target="_blank" class="sidebar-link">
+                    <span>🐱</span> GitHub
+                </a>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="header-section">
+                <h1>Test Code Editor</h1>
+                <div class="model-info">
+                    <h3>Groq DeepSeek-R1-Distill-LLaMA-70B</h3>
+                    <button onclick="showSettings()" class="settings-button">
+                        <span>⚙️</span> Settings
+                    </button>
+                </div>
+                <div class="mode-toggle">
+                    <button id="chatMode" class="active" onclick="setMode('chat')">Chat Mode</button>
+                    <button id="codeMode" onclick="setMode('code')">Write Code Mode</button>
+                </div>
+            </div>
+            
+            <div id="settingsModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Settings</h2>
+                        <span class="close-button" onclick="hideSettings()">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="setting-group">
+                            <label for="apiKey">Groq API Key:</label>
+                            <div class="api-key-input">
+                                <input type="password" id="apiKey" placeholder="Enter your Groq API key">
+                                <button onclick="toggleApiKeyVisibility()" class="toggle-visibility">
+                                    <span id="visibilityIcon">👁️</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button onclick="saveSettings()" class="save-settings">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <div class="example-prompts">
+                    <p>Example prompts:</p>
+                    <ul>
+                        <li onclick="document.getElementById('prompt').value = 'Create a calculator using HTML, CSS and JavaScript. Requirements: \n- HTML structure with a display area and buttons for numbers 0-9\n- Buttons for operations (+, -, *, /)\n- Clear (C) and equals (=) buttons\n- Clean, modern CSS styling with flexbox or grid layout\n- Responsive design that works on mobile devices\n- JavaScript event handlers for button clicks\n- Function to evaluate mathematical expressions\n- Error handling for invalid inputs\n- Hover effects and click animations for buttons'">Create a HTML calculator</li>
+                        <li onclick="document.getElementById('prompt').value = 'Create a todo list application using HTML, CSS, and JavaScript. Requirements:\n- HTML form for task input with text field and add button\n- UL/LI elements for the task list\n- CSS styling for tasks with hover and active states\n- Local storage implementation for data persistence\n- JavaScript event listeners for form submission\n- Filter buttons in HTML (All, Active, Completed)\n- Edit functionality with contenteditable or input fields\n- Delete button for each task\n- Checkbox input for marking tasks complete\n- Smooth CSS transitions for adding/removing tasks'">Create a Todo List app</li>
+                    </ul>
+                </div>
+                <label for="prompt">Enter your prompt:</label>
+                <div class="input-group">
+                    <textarea id="prompt" placeholder="Ask a question or describe the code you want to generate..."></textarea>
+                    <div class="prompt-controls">
+                        <button class="enhance-button" onclick="enhancePrompt()">
+                            <span>✨</span> Enhance
+                        </button>
+                        <button class="clear-button" onclick="clearPrompt()">
+                            <span>🗑️</span> Clear
+                        </button>
+                        <button class="copy-prompt-button" onclick="copyPrompt()">
+                            <span>📋</span> Copy Prompt
+                        </button>
+                        <button class="paste-prompt-button" onclick="pastePrompt()">
+                            <span>📋</span> Paste Prompt
+                        </button>
+                    </div>
+                </div>
+                <button class="generate" onclick="sendPrompt()" id="generateButton">Send</button>
+            </div>
+
+            <div class="output-section">
+                <div id="codeContainer" class="code-container" style="display: none;">
+                    <div class="code-box">
+                        <div class="code-box-header">
+                            <div class="code-controls">
+                                <button onclick="undo()" id="undoButton" disabled>
+                                    <span>↩️</span> Undo
+                                </button>
+                                <button onclick="redo()" id="redoButton" disabled>
+                                    <span>↪️</span> Redo
+                                </button>
+                                <button onclick="editCode()" id="editButton">
+                                    <span>✏️</span> Manual Edit
+                                </button>
+                                <button onclick="saveCode()" id="saveButton" style="display: none;">
+                                    <span>💾</span> Save
+                                </button>
+                                <button onclick="aiEdit()" id="aiEditButton">
+                                    <span>🤖</span> AI Edit
+                                </button>
+                                <button onclick="downloadCode()">
+                                    <span>⬇️</span> Download
+                                </button>
+                                <button onclick="openFileUpload()" class="upload-button">
+                                    <span>⬆️</span> Upload Files
+                                </button>
+                                <button onclick="copyCode()" class="copy-button">
+                                    <span>📋</span> Copy Code
+                                </button>
+                                <button onclick="pasteCode()" class="paste-button">
+                                    <span>📋</span> Paste Code
+                                </button>
+                            </div>
+                        </div>
+                        <div id="codeBoxContent" class="code-box-content">
+                            <textarea id="codeEditor"></textarea>
+                        </div>
+                        <div id="editPromptContainer" class="edit-prompt">
+                            <textarea id="editPrompt" placeholder="Describe how you want to modify the code..." rows="3" class="form-control"></textarea>
+                            <div class="edit-controls">
+                                <button onclick="submitEdit()" class="edit-button">Apply Changes</button>
+                                <button onclick="cancelEdit()" class="edit-button">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="previewContainer" class="preview-container" style="display: none;">
+                    <div class="preview-header">
+                        <div class="preview-title">
+                            Live Preview
+                            <div class="generation-status" id="generationStatus"></div>
+                        </div>
+                        <div class="preview-controls">
+                            <button onclick="resetEverything()" class="preview-button">
+                                <span>🔄</span> Reset Everything
+                            </button>
+                            <button onclick="openInNewWindow()" class="preview-button">
+                                <span>📋</span> Open in New Window
+                            </button>
+                        </div>
+                    </div>
+                    <iframe id="previewFrame" class="preview-frame"></iframe>
+                </div>
+                <div id="console" class="console" style="display: none;">
+                    <div id="output"></div>
+                </div>
+                <div id="chatOutput" style="display: none;"></div>
+                <div id="status" class="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileUpload" style="display: none;" multiple onchange="handleFileUpload(event)">
+    <script src="main.js"></script>
+</body>
+</html>
